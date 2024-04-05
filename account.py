@@ -18,10 +18,9 @@ def save_user_data(name, email, mobile, unique_id, dob):
     user_data = pd.DataFrame({'Name': [name], 'Email': [email], 'Mobile': [mobile], 'Unique ID': [unique_id], 'DOB': [dob]})
     user_data.to_csv('user_data.csv', mode='a', index=False, header=not os.path.exists('user_data.csv'))
 
-# Initialize Firebase app
-if not firebase_admin._apps:
-    cred = credentials.Certificate("C:/Users/DELL/Desktop/PERsonal/NEET_Portal/NEET_portal/neet-exam-portal-57ad1-51c5e39090df.json")
-    firebase_admin.initialize_app(cred)
+# Provide the path to your Firebase credentials JSON file
+cred = credentials.Certificate("C:/Users/DELL/Desktop/PERsonal/NEET_Portal/NEET_portal/neet-exam-portal-57ad1-51c5e39090df.json")
+firebase_admin.initialize_app(cred)
 
 # Email validation function
 def is_valid_email(email):
