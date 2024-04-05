@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "neet-exam-portal-57ad1",
+  "private_key_id": "51c5e39090df866854fc16448561454fa2c234b4",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCr4m9OctiT9Wwx\nE3gZbC1mz6OX7M+JKQ1oG/hEHP8NbGLFqx0RRr8n2CUgSucljy2AT328Qx3urWSQ\nheZTcHsmE+dKs4RykR3URkJ3qj/EabmEi1EzPiUQf1aekM4ODuAlmv/1+rgxAoJ7\njZA0MogaCsSkCzO1IIzvocH1lEGdwolKwF1N1aKqocswXRsDAFi9BJki+Kt0yJ0B\noAPbpK5Iy2pSMKrxB6+Wcbi7CUNMCvv447WM/OOUG8VtNFs404/+m3xmHy6HZKhX\nGxGawhEtpxs1tdB89StV6R8esvciZE9CrYvjN0eYL+XY8HL5iFJR7Tbq361u4tzd\nH8fCSxVBAgMBAAECggEAAoW7Z+2QB5XTrWGxgr//Z5GW/0ECp6riTzuP2GILjSUg\nyvFQpyMAZaOKoe9vdnHkM0yXVgavHwRM5EEOyP0u1Xd3zrUVNcAy7Z1NVue48Vcy\n2YLY4XVhQl14BjIuT+8Ac5TTekbgYpm8k/cXHWj7bdRoH9cpPlh4sQCQ8dtn3hqJ\nSUkq9duJBpdARbJ8hnBLZbJxiOpJRdDYi5pKErgqif9uRG9exCQKnsQXTYF9UrM6\nuazGI3gWYaELNqwwSWSj24ICOFa1RomM3kShVIyRoYtvP4IP0G/X4r1xFdhbHWct\nC4QsjEZXHt/USAaNXAYi2XQvCeqXIQSkCss4K6N7tQKBgQDseya6FEzmqUkM2qzF\n3pluPN/mDPR8ZLoO+ZuvFstyjZ+qN18s5U3jku5TjKwF/q31sRhul/+pyegSps66\n/ZX9NQe5CKfIkVOBke+/u5cOEMGjQCl0zTcWhFK/R25DqBGU1aIBu/Nh+9ln0ku2\nRd4rzaz+LprfS8ED0X6V2iZ3tQKBgQC6Elt8OO+2DJXvZHWlnZAEp7a0dFvXMhi0\n6FGcK3bghTXthkCi16wE5Qu6d2t1jJFIUaSY8VXnamWEIrivctNM4BrsMrJkw70Q\nMXBeIonsqCiI8YoklljHq6LMXda2Vj6lNp6FcToTeEicAo/fWgd7EmIHVQXGUpLk\ncSzABNmG3QKBgH/rgiBoOM0RR6W/aHREnGSIY2kzGtFrP0Y4eaG1x+m4eGUAPOix\nRXfUFD13u9omUP21hYzVhgPXZ0UnnG6EHC1zETFjYDdbfXt6cOEbXXPLVqOzYnl/\nRMxWWdiEkD3i3VfQVClx/Q7EyG6j0DbSBoNVZ727giVF+ivRmBMBhYt9AoGAM4UV\ns6WIKd3+PdSRBpRD5iYR3pFBRKpoUN7qidU3Cx+XOPctOmmBBbHtt2mNZXTQXTfN\n3VMlN/grt5Rtkpa2jtiWW8QFxQS1eqBVvprNmatN3e0TFOJUHqUVZISvCLmEivY+\nmjAppm5tnFTRRUSGQbtrTSBrgugmJ/52J4ywNjkCgYAL0vuJBs3/EZmkK9oK8ioR\nifjZc0rZiYyc7NYU46ilSM2YgEXKhAPrv/ifpXM0m1lp0I1O8fjeD6G72Lk7B8m3\nsuOw95M8QwNAu5Q4NIuYqoD54Ec3EFp30Q7VOx8katUuNduaHyb52Oc339I79s7u\nrrQeHkGFXJOe8yEsNka9UA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-pm6ii@neet-exam-portal-57ad1.iam.gserviceaccount.com",
+  "client_id": "109157284240919857865",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-pm6ii%40neet-exam-portal-57ad1.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
