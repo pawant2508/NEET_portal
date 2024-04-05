@@ -176,7 +176,7 @@ def admin_login():
     username = st.text_input('Username')
     password = st.text_input('Password', type='password')
     
-    if username == 'admin' and password == 'adminpassword':
+    if username == 'admin' and password == 'adminpass':
         st.success('Login successful!')
         # Add code to display registered students' entries and manage them
     elif st.button('Login'):
@@ -193,12 +193,14 @@ def app():
     st.session_state.setdefault('signout', False)
 
     if not st.session_state.signedout:
-        choice = st.selectbox('Login/Register', ['Login', 'Register'])
+        choice = st.selectbox('Login/Register/Admin-Login', ['Login', 'Register', 'Admin-Login'])
 
         if choice == 'Register':
             registration()  # Call the registration function
-        elif choice =='Admin_Login':
+            
+        elif choice =='Admin-Login':
             admin_login()  #call the admin login function
+            
         else:
             st.title('Login')
             email_or_unique_id = st.text_input('Email Address or Unique ID')
