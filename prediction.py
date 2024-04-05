@@ -64,8 +64,8 @@ def app():
                 st.session_state.mock_test_scores.append(possible_score)
 
         if st.button("Generate Possible Score"):
-            #score_range = (300, 720)  # Define the range of possible scores
-            possible_score = st.session_state.MKtst1
+            score_range = (300, 720)  # Define the range of possible scores
+            possible_score = generate_possible_score(score_range)
             st.write("Possible Score:", possible_score)
 
             # Randomly select a category
