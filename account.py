@@ -1,6 +1,6 @@
 import streamlit as st
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, firestore
 import json
 import requests
 import re
@@ -10,8 +10,6 @@ from datetime import datetime, timedelta
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import streamlit as st
-import pandas as pd
 
 # Initialize Firebase app
 if not firebase_admin._apps:
@@ -50,8 +48,26 @@ def generate_unique_id():
 def is_valid_mobile(mobile):
     return re.match(r'^\d{10}$', mobile) is not None
 
+# Send verification email with OTP
+def send_verification_email(email, otp):
+    sender_email = "your_service_email@gmail.com"
+    sender_password = "your_service_email_password"
+    subject = "Verification Code for NEET Portal"
+    message = f"Your OTP for NEET Portal registration is: {otp}"
+
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(message, 'plain'))
+
+    with smtplib.SMTP('smtp.gmail.com', 587) as server:
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+
 # Signup with email, password, username, category, mobile number, and date of birth
-def sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, return_secure_token=True):
+def sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, category, otp, return_secure_token=True):
     try:
         if password != confirm_password:
             st.warning("Passwords do not match!")
@@ -73,6 +89,8 @@ def sign_up_with_email_and_password(name, email, mobile, unique_id, password, co
             payload["unique_id"] = unique_id
         if dob:
             payload["dob"] = dob
+        if category:
+            payload["category"] = category
         payload = json.dumps(payload)
         r = requests.post(rest_api_url, params={"key": "AIzaSyApr-etDzcGcsVcmaw7R7rPxx3A09as7uw"}, data=payload)
         data = r.json()
@@ -83,7 +101,8 @@ def sign_up_with_email_and_password(name, email, mobile, unique_id, password, co
                 "email": email,
                 "mobile": mobile,
                 "unique_id": unique_id,
-                "dob": dob
+                "dob": dob,
+                "category": category
             }
             db.collection('users').document(email).set(user_data)
             return data['email']
@@ -105,8 +124,16 @@ def registration():
     min_date = datetime(1900, 1, 1)
     dob = st.date_input('Date of Birth', min_value=min_date)
     
+    category_options = ['GEN', 'OBC', 'SC', 'ST', 'NT', 'EWS']
+    category = st.selectbox('Category', category_options)
+    
+    # Generate OTP
+    otp = ''.join(random.choices(string.digits, k=6))
+    st.text('An OTP has been sent to your email address. Please enter it below.')
+    
     if st.button('Register'):
-        sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob)
+        sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, category, otp)
+        send_verification_email(email, otp)  # Send verification email
 
 # User registration and login UI
 def app():
@@ -135,11 +162,6 @@ def app():
         st.button('Log out')
 
     st.title('*Thank You...!*')
-
-if __name__ == "__main__":
-    app()
-  st.title('*Thank You...!*')
-
 
 if __name__ == "__main__":
     app()
