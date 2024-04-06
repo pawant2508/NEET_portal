@@ -77,6 +77,13 @@ def sign_up_with_email_and_password(name, email, mobile, unique_id, password, co
             st.warning("Invalid mobile number. Please enter a 10-digit number.")
             return
 
+        # Check if age is at least 15 years
+        today = datetime.today()
+        min_date = today - timedelta(days=15*365)  # 15 years ago
+        if dob > min_date:
+            st.warning("You must be at least 15 years old to register.")
+            return
+
         rest_api_url = "https://identitytoolkit.googleapis.com/v1/accounts:signUp"
         payload = {
             "email": email,
@@ -88,7 +95,7 @@ def sign_up_with_email_and_password(name, email, mobile, unique_id, password, co
         if unique_id:
             payload["unique_id"] = unique_id
         if dob:
-            payload["dob"] = dob
+            payload["dob"] = dob.strftime('%Y-%m-%d')
         if category:
             payload["category"] = category
         payload = json.dumps(payload)
@@ -101,7 +108,7 @@ def sign_up_with_email_and_password(name, email, mobile, unique_id, password, co
                 "email": email,
                 "mobile": mobile,
                 "unique_id": unique_id,
-                "dob": dob,
+                "dob": dob.strftime('%Y-%m-%d'),
                 "category": category
             }
             db.collection('users').document(email).set(user_data)
@@ -121,9 +128,16 @@ def registration():
     password = st.text_input('Password', type='password')
     confirm_password = st.text_input('Confirm Password', type='password')
     
-    min_date = datetime(1900, 1, 1)
-    dob = st.date_input('Date of Birth', min_value=min_date)
-    
+    dob = st.date_input('Date of Birth')
+
+    today = datetime.today()
+    min_date = today - timedelta(days=15*365)  # 15 years ago
+    st.write(f"You must be at least 15 years old to register. Minimum date of birth: {min_date.strftime('%Y-%m-%d')}")
+
+    if dob > min_date:
+        st.warning("You must be at least 15 years old to register.")
+        return
+
     category_options = ['GEN', 'OBC', 'SC', 'ST', 'NT', 'EWS']
     category = st.selectbox('Category', category_options)
     
