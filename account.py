@@ -13,15 +13,12 @@ from email.mime.multipart import MIMEMultipart
 import streamlit as st
 import pandas as pd
 
-# Function to save user data to a CSV file
-def save_user_data(name, email, mobile, unique_id, dob):
-    user_data = pd.DataFrame({'Name': [name], 'Email': [email], 'Mobile': [mobile], 'Unique ID': [unique_id], 'DOB': [dob]})
-    user_data.to_csv('user_data.csv', mode='a', index=False, header=not os.path.exists('user_data.csv'))
-
-# Provide the path to your Firebase credentials JSON file
+# Initialize Firebase app
 if not firebase_admin._apps:
     cred = credentials.Certificate("neet-exam-portal-57ad1-51c5e39090df.json")
     firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 # Email validation function
 def is_valid_email(email):
@@ -54,7 +51,7 @@ def is_valid_mobile(mobile):
     return re.match(r'^\d{10}$', mobile) is not None
 
 # Signup with email, password, username, category, mobile number, and date of birth
-def sign_up_with_email_and_password(email, mobile, unique_id, password, confirm_password, dob, return_secure_token=True):
+def sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, return_secure_token=True):
     try:
         if password != confirm_password:
             st.warning("Passwords do not match!")
@@ -80,72 +77,20 @@ def sign_up_with_email_and_password(email, mobile, unique_id, password, confirm_
         r = requests.post(rest_api_url, params={"key": "AIzaSyApr-etDzcGcsVcmaw7R7rPxx3A09as7uw"}, data=payload)
         data = r.json()
         if 'email' in data:
+            # Save user data to Firestore
+            user_data = {
+                "name": name,
+                "email": email,
+                "mobile": mobile,
+                "unique_id": unique_id,
+                "dob": dob
+            }
+            db.collection('users').document(email).set(user_data)
             return data['email']
         else:
             st.warning(data)
     except Exception as e:
         st.warning(f'Signup failed: {e}')
-
-# Login function
-def login(email_or_unique_id, password):
-    try:
-        if '@' in email_or_unique_id:
-            email = email_or_unique_id
-            if not is_valid_email(email):
-                st.warning("Invalid email address. Please enter a valid email.")
-                return
-            userinfo = sign_in_with_email_and_password(email, password)
-        else:
-            unique_id = email_or_unique_id
-            # Implement the logic for unique ID login
-            # For example:
-            # userinfo = sign_in_with_unique_id(unique_id, password)
-            pass
-        
-        if userinfo:
-            st.session_state.username = userinfo.get('username', '')
-            st.session_state.useremail = userinfo.get('email', '')
-            st.session_state.signedout = True
-            st.session_state.signout = True
-        else:
-            st.warning('Login failed. Incorrect email/unique ID or password.')
-    except Exception as e:
-        st.error(f'An error occurred during login: {e}')
-
-# Logout function
-def logout():
-    st.session_state.signout = False
-    st.session_state.signedout = False   
-    st.session_state.username = ''
-    st.session_state.useremail = ''
-
-# Forgot password function
-def forgot_password():
-    email = st.text_input('Email')
-    if st.button('Send Reset Link'):
-        success, message = reset_password(email)
-        if success:
-            st.success("Password reset email sent successfully.")
-        else:
-            st.warning(f"Password reset failed: {message}") 
-
-# Function to send verification email with OTP
-def send_verification_email(email, otp):
-    sender_email = "your_email@gmail.com"
-    sender_password = "your_password"
-    subject = "Verification Code for NEET Portal"
-    message = f"Your OTP for NEET Portal registration is: {otp}"
-
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = email
-    msg['Subject'] = subject
-    msg.attach(MIMEText(message, 'plain'))
-
-    with smtplib.SMTP('smtp.gmail.com', 587) as server:
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.send_message(msg)
 
 # Registration UI
 def registration():
@@ -161,27 +106,8 @@ def registration():
     dob = st.date_input('Date of Birth', min_value=min_date)
     
     if st.button('Register'):
-        # Generate OTP
-        otp = ''.join(random.choices(string.digits, k=6))
-        # Send verification email
-        send_verification_email(email, otp)
-        st.success('Please check your email for the verification code.')
-        
-        # Add code to verify OTP and complete registration process
-        # You can prompt the user to enter the OTP received in their email and verify it here
-    
-# Admin login UI
-def admin_login():
-    st.title('Admin Login')
-    username = st.text_input('Username')
-    password = st.text_input('Password', type='password')
-    
-    if username == 'admin' and password == 'adminpass':
-        st.success('Login successful!')
-        # Add code to display registered students' entries and manage them
-    elif st.button('Login'):
-        st.error('Invalid username or password. Please try again.')
-        
+        sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob)
+
 # User registration and login UI
 def app():
     st.title('Welcome to Chances of Qualifying NEET Examination Portal')
@@ -193,27 +119,26 @@ def app():
     st.session_state.setdefault('signout', False)
 
     if not st.session_state.signedout:
-        choice = st.selectbox('Login/Register/Admin-Login', ['Login', 'Register', 'Admin-Login'])
+        choice = st.selectbox('Login/Register', ['Login', 'Register'])
 
         if choice == 'Register':
             registration()  # Call the registration function
             
-        elif choice =='Admin-Login':
-            admin_login()  #call the admin login function
-            
         else:
             st.title('Login')
-            email_or_unique_id = st.text_input('Email Address or Unique ID')
-            password = st.text_input('Password', type='password')
-            if st.button('Login'):
-                login(email_or_unique_id, password)
+            # Implement login functionality
+            pass
 
     if st.session_state.signout:
         st.markdown('*Name* : ' + st.session_state.username)
         st.markdown('*Email id*: ' + st.session_state.useremail)
-        st.button('Log out', on_click=logout)
+        st.button('Log out')
 
     st.title('*Thank You...!*')
+
+if __name__ == "__main__":
+    app()
+  st.title('*Thank You...!*')
 
 
 if __name__ == "__main__":
