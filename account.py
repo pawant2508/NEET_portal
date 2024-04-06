@@ -20,7 +20,7 @@ def save_user_data(name, email, mobile, unique_id, dob):
 
 # Provide the path to your Firebase credentials JSON file
 if not firebase_admin._apps:
-    cred = credentials.Certificate("NEET_portal/neet-exam-portal-57ad1-51c5e39090df.json")
+    cred = credentials.Certificate("neet-exam-portal-57ad1-51c5e39090df.json")
     firebase_admin.initialize_app(cred)
 
 # Email validation function
