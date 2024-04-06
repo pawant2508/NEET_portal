@@ -118,6 +118,18 @@ def sign_up_with_email_and_password(name, email, mobile, unique_id, password, co
     except Exception as e:
         st.warning(f'Signup failed: {e}')
 
+# Admin login function
+def admin_login():
+    st.title('Admin Login')
+    username = st.text_input('Username')
+    password = st.text_input('Password', type='password')
+    
+    if username == 'admin' and password == 'adminpass':
+        st.success('Login successful!')
+        # Add code to display registered students' entries and manage them
+    elif st.button('Login'):
+        st.error('Invalid username or password. Please try again.')
+
 # Registration UI
 def registration():
     st.title('Registration')
@@ -160,10 +172,13 @@ def app():
     st.session_state.setdefault('signout', False)
 
     if not st.session_state.signedout:
-        choice = st.selectbox('Login/Register', ['Login', 'Register'])
+        choice = st.selectbox('Login/Register', ['Login', 'Register', 'Admin Login'])
 
         if choice == 'Register':
             registration()  # Call the registration function
+            
+        elif choice == 'Admin Login':
+            admin_login()  # Call the admin login function
             
         else:
             st.title('Login')
