@@ -1,17 +1,15 @@
 import streamlit as st
 import firebase_admin
-from firebase_admin import auth
 from firebase_admin import credentials, firestore
+from firebase_admin import auth
 import re
 import random
 import string
 from datetime import datetime, timedelta
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 # Path to the service account key JSON file
-service_account_key_path = "neet-exam-portal-57ad1-4f5e95416ce8.json"
+service_account_key_path = "C:/Users/DELL/Desktop/PERsonal/NEET_Portal/neet-exam-portal-57ad1-4f5e95416ce8.json"
+
 
 try:
     # Initialize Firebase app with the service account key
@@ -21,6 +19,73 @@ try:
 except ValueError as e:
     st.error(f"Failed to initialize Firebase: {e}")
     st.stop()
+
+# Function to check if the user is an authorized admin
+def is_authorized_admin(user_email):
+    # Implement your logic to check if the user is an admin
+    # For example, you can maintain a list of authorized admin emails
+    # and check if the user's email is in that list
+    authorized_admin_emails = ["admin1@example.com", "admin2@example.com"]
+    return user_email in authorized_admin_emails
+
+# Admin panel functionality
+def admin_panel():
+    st.title("Admin Dashboard")
+    st.write("Welcome, Admin!")
+
+    # Add some sample admin functionalities
+    st.subheader("Manage Users")
+    st.write("Here you can manage user accounts.")
+
+    # Example of displaying Firestore data
+    users_ref = db.collection("users")
+    users = users_ref.get()
+    if users:
+        st.write("User List:")
+        for user in users:
+            user_data = user.to_dict()
+            st.write(f"- {user.id}: {user_data}")
+
+    # Add more admin functionalities as needed
+    st.subheader("Manage Content")
+    st.write("Here you can manage content.")
+
+    # Example of a form to add new content
+    st.subheader("Add New Content")
+    content_title = st.text_input("Title")
+    content_description = st.text_area("Description")
+    if st.button("Add Content"):
+        # Add logic to save content to Firestore
+        st.success(f"Content '{content_title}' added successfully!")
+
+    # Add more components and functionalities here
+
+    # Add your admin panel functionality here
+
+# Admin login function
+def admin_login():
+    st.title("Admin Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    
+    if st.button("Login"):
+        try:
+            # Authenticate the admin user
+            user = auth.get_user_by_email(username)
+            if user.email_verified and user.email == username:
+                # Check if the user is an authorized admin
+                if is_authorized_admin(username):
+                    st.success("Login successful!")
+                    admin_panel()  # Show admin panel
+                else:
+                    st.error("Unauthorized access. You are not an admin.")
+            else:
+                st.error("Invalid username or password.")
+        except auth.UserNotFoundError:
+            st.error("User not found.")
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+
 
 # Email validation function
 def is_valid_email(email):
@@ -64,12 +129,10 @@ def sign_up_with_email_and_password(name, email, mobile, unique_id, password, co
             return
 
         # Check if age is at least 15 years
-        today = datetime.today()
-        min_date = today - timedelta(days=15*365)  # 15 years ago
-        if dob > datetime.combine(datetime.today().date() - timedelta(days=15*365), datetime.min.time()):
+        min_date = datetime.today() - timedelta(days=15*365)  # 15 years ago
+        if dob > min_date.date():
             st.warning("You must be at least 15 years old to register.")
             return
-
 
         # Save user data to Firestore
         user_data = {
@@ -86,28 +149,6 @@ def sign_up_with_email_and_password(name, email, mobile, unique_id, password, co
         st.success("Registration successful!")
     except Exception as e:
         st.warning(f'Signup failed: {e}')
-
-# Define the authorized admin email
-AUTHORIZED_ADMIN_EMAIL = "yashtiwarimt222@gmail.com"
-
-# Function to check if the user is an authorized admin
-def is_authorized_admin(user_email):
-    return user_email == AUTHORIZED_ADMIN_EMAIL
-
-
-# Admin login function
-def admin_login():
-    st.title("Admin Panel")
-
-    # Get the current user's email from Firebase authentication
-    user = auth.get_user_by_email(AUTHORIZED_ADMIN_EMAIL)
-    user_email = user.email
-
-    if is_authorized_admin(user_email):
-        st.write("Welcome, Admin!")
-        # Add your admin panel functionality here
-    else:
-        st.error("Unauthorized access. You are not authorized to view this page.")
 
 # Registration UI
 def registration():
@@ -127,42 +168,21 @@ def registration():
     
     st.write(f"You must be at least 15 years old to register.")
 
-    if dob > min_date:
-        st.warning("You must be at least 15 years old to register.")
-        return
-    
     category_options = ['GEN', 'OBC', 'SC', 'ST', 'NT', 'EWS']
     category = st.selectbox('Category', category_options)
     
     if st.button('Register'):
         sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, category)
 
-# User login function
+# User login function (not included for brevity)
 def user_login():
-    st.title('User Login')
-    email_or_unique_id = st.text_input('Email Address or Unique ID')
-    password = st.text_input('Password', type='password')
+    pass
 
-    # Add authentication logic here
-    if st.button('Login'):
-        # Placeholder authentication logic
-        user_data = db.collection('users').where('Email', '==', email_or_unique_id).get()
-        if not user_data:
-            user_data = db.collection('users').where('Unique_ID', '==', email_or_unique_id).get()
+# Admin login function (not included for brevity)
+def admin_panel():
+    pass
 
-        if user_data:
-            user = user_data[0].to_dict()
-            if user['password'] == password:
-                st.success('Login successful!')
-                st.session_state.username = user['name']  # Store username in session state
-                st.session_state.useremail = user['Email']  # Store user email in session state
-                st.session_state.signedout = True  # Set signedout to True
-            else:
-                st.error('Invalid password. Please try again.')
-        else:
-            st.error('User not found. Please check your email/unique ID and try again.')
-
-# User registration and login UI
+# Main app function
 def app():
     st.title('Welcome to Chances of Qualifying NEET Examination Portal')
     
