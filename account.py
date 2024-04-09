@@ -1,8 +1,7 @@
 import streamlit as st
 import firebase_admin
+from firebase_admin import auth
 from firebase_admin import credentials, firestore
-import json
-import requests
 import re
 import random
 import string
@@ -11,12 +10,17 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-# Initialize Firebase app
-if not firebase_admin._apps:
-    cred = credentials.Certificate("neet-exam-portal-57ad1-51c5e39090df.json")
-    firebase_admin.initialize_app(cred)
+# Path to the service account key JSON file
+service_account_key_path = "C:/Users/DELL/Desktop/PERsonal/NEET_Portal/neet-exam-portal-57ad1-4f5e95416ce8.json"
 
-db = firestore.client()
+try:
+    # Initialize Firebase app with the service account key
+    cred = credentials.Certificate(service_account_key_path)
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+except ValueError as e:
+    st.error(f"Failed to initialize Firebase: {e}")
+    st.stop()
 
 # Email validation function
 def is_valid_email(email):
@@ -48,26 +52,8 @@ def generate_unique_id():
 def is_valid_mobile(mobile):
     return re.match(r'^\d{10}$', mobile) is not None
 
-# Send verification email with OTP
-def send_verification_email(email, otp):
-    sender_email = "your_service_email@gmail.com"
-    sender_password = "your_service_email_password"
-    subject = "Verification Code for NEET Portal"
-    message = f"Your OTP for NEET Portal registration is: {otp}"
-
-    msg = MIMEMultipart()
-    msg['From'] = sender_email
-    msg['To'] = email
-    msg['Subject'] = subject
-    msg.attach(MIMEText(message, 'plain'))
-
-    with smtplib.SMTP('smtp.gmail.com', 587) as server:
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.send_message(msg)
-
 # Signup with email, password, username, category, mobile number, and date of birth
-def sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, category, otp, return_secure_token=True):
+def sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, category, return_secure_token=True):
     try:
         if password != confirm_password:
             st.warning("Passwords do not match!")
@@ -80,55 +66,48 @@ def sign_up_with_email_and_password(name, email, mobile, unique_id, password, co
         # Check if age is at least 15 years
         today = datetime.today()
         min_date = today - timedelta(days=15*365)  # 15 years ago
-        if dob > min_date:
+        if dob > datetime.combine(datetime.today().date() - timedelta(days=15*365), datetime.min.time()):
             st.warning("You must be at least 15 years old to register.")
             return
 
-        rest_api_url = "https://identitytoolkit.googleapis.com/v1/accounts:signUp"
-        payload = {
-            "email": email,
-            "password": password,
-            "returnSecureToken": return_secure_token
+
+        # Save user data to Firestore
+        user_data = {
+            "name": name,
+            "Email": email,
+            "Phone_Number": mobile,
+            "Unique_ID": unique_id,
+            "DoB": dob.strftime('%Y-%m-%d'),
+            "Category": category
         }
-        if mobile:
-            payload["mobile"] = mobile
-        if unique_id:
-            payload["unique_id"] = unique_id
-        if dob:
-            payload["dob"] = dob.strftime('%Y-%m-%d')
-        if category:
-            payload["category"] = category
-        payload = json.dumps(payload)
-        r = requests.post(rest_api_url, params={"key": "AIzaSyApr-etDzcGcsVcmaw7R7rPxx3A09as7uw"}, data=payload)
-        data = r.json()
-        if 'email' in data:
-            # Save user data to Firestore
-            user_data = {
-                "name": name,
-                "email": email,
-                "mobile": mobile,
-                "unique_id": unique_id,
-                "dob": dob.strftime('%Y-%m-%d'),
-                "category": category
-            }
-            db.collection('users').document(email).set(user_data)
-            return data['email']
-        else:
-            st.warning(data)
+        db.collection('users').document(email).set(user_data)
+
+        # Return success message
+        st.success("Registration successful!")
     except Exception as e:
         st.warning(f'Signup failed: {e}')
 
+# Define the authorized admin email
+AUTHORIZED_ADMIN_EMAIL = "yashtiwarimt222@gmail.com"
+
+# Function to check if the user is an authorized admin
+def is_authorized_admin(user_email):
+    return user_email == AUTHORIZED_ADMIN_EMAIL
+
+
 # Admin login function
 def admin_login():
-    st.title('Admin Login')
-    username = st.text_input('Username')
-    password = st.text_input('Password', type='password')
-    
-    if username == 'admin' and password == 'adminpass':
-        st.success('Login successful!')
-        # Add code to display registered students' entries and manage them
-    elif st.button('Login'):
-        st.error('Invalid username or password. Please try again.')
+    st.title("Admin Panel")
+
+    # Get the current user's email from Firebase authentication
+    user = auth.get_user_by_email(AUTHORIZED_ADMIN_EMAIL)
+    user_email = user.email
+
+    if is_authorized_admin(user_email):
+        st.write("Welcome, Admin!")
+        # Add your admin panel functionality here
+    else:
+        st.error("Unauthorized access. You are not authorized to view this page.")
 
 # Registration UI
 def registration():
@@ -140,26 +119,48 @@ def registration():
     password = st.text_input('Password', type='password')
     confirm_password = st.text_input('Confirm Password', type='password')
     
-    dob = st.date_input('Date of Birth')
+    # Set the range of dates to display the whole year
+    max_date = datetime(datetime.today().year, 12, 31).date()
+    min_date = datetime(datetime.today().year - 100, 1, 1).date()
 
-    today = datetime.today()
-    min_date = today - timedelta(days=15*365)  # 15 years ago
-    st.write(f"You must be at least 15 years old to register. Minimum date of birth: {min_date.strftime('%Y-%m-%d')}")
+    dob = st.date_input('Date of Birth', min_value=min_date, max_value=max_date)
+    
+    st.write(f"You must be at least 15 years old to register.")
 
     if dob > min_date:
         st.warning("You must be at least 15 years old to register.")
         return
-
+    
     category_options = ['GEN', 'OBC', 'SC', 'ST', 'NT', 'EWS']
     category = st.selectbox('Category', category_options)
     
-    # Generate OTP
-    otp = ''.join(random.choices(string.digits, k=6))
-    st.text('An OTP has been sent to your email address. Please enter it below.')
-    
     if st.button('Register'):
-        sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, category, otp)
-        send_verification_email(email, otp)  # Send verification email
+        sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, category)
+
+# User login function
+def user_login():
+    st.title('User Login')
+    email_or_unique_id = st.text_input('Email Address or Unique ID')
+    password = st.text_input('Password', type='password')
+
+    # Add authentication logic here
+    if st.button('Login'):
+        # Placeholder authentication logic
+        user_data = db.collection('users').where('Email', '==', email_or_unique_id).get()
+        if not user_data:
+            user_data = db.collection('users').where('Unique_ID', '==', email_or_unique_id).get()
+
+        if user_data:
+            user = user_data[0].to_dict()
+            if user['password'] == password:
+                st.success('Login successful!')
+                st.session_state.username = user['name']  # Store username in session state
+                st.session_state.useremail = user['Email']  # Store user email in session state
+                st.session_state.signedout = True  # Set signedout to True
+            else:
+                st.error('Invalid password. Please try again.')
+        else:
+            st.error('User not found. Please check your email/unique ID and try again.')
 
 # User registration and login UI
 def app():
@@ -180,10 +181,8 @@ def app():
         elif choice == 'Admin Login':
             admin_login()  # Call the admin login function
             
-        else:
-            st.title('Login')
-            # Implement login functionality
-            pass
+        elif choice == 'Login':
+            user_login()  # Call the user login function
 
     if st.session_state.signout:
         st.markdown('*Name* : ' + st.session_state.username)
