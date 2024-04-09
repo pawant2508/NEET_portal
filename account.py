@@ -8,7 +8,7 @@ import string
 from datetime import datetime, timedelta
 
 # Path to the service account key JSON file
-service_account_key_path = "C:/Users/DELL/Desktop/PERsonal/NEET_Portal/neet-exam-portal-57ad1-4f5e95416ce8.json"
+service_account_key_path = "neet-exam-portal-57ad1-4f5e95416ce8.json"
 
 
 try:
