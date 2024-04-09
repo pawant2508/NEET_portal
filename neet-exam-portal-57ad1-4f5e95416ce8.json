@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "neet-exam-portal-57ad1",
+  "private_key_id": "4f5e95416ce8ee3526c75796ab7209186f6fb290",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCrh8KX1/PVPQXa\nByARtXUZmemlbmzVlfmMf7AXVdsZDKqwkehyqA5/NvNQb+zf2iezUJf5DIiTbG+6\nN3EjVBGcFcTzRsk2lSSjShI4e+6vgyHfe/gTVqAtqMNYwX6iQJz6hrenLDtSFU3p\n1F0dzCWU3ppSXnrvlCCVenK7+9Sr9338sZFHe1mTfAeqH9GvTAoS+rjH9xp66hin\nMDDrXPMwOUdE9EutFlkdS6rLDS5uo+9n44WZ8NZuniHU2bQv/D8xNRgE6KwzSvNW\ngZHgcVFFzfpmo3DmrtnOYXVjZocRDJyA+N3bJvwb40/wE3FI3Lx0np042/4q05qt\nEMhPVpAvAgMBAAECggEAGsBD/WQNCi2yVW6fYOj7TRWqENuitpa6rLTslLRrmexV\n9yPyQWYV819xspLvZCPvkBwaxMO1zcQaEqEl5bwX46So1XCt3cjZxhY9tuMWdkyN\nrP8g+9HFOQm6WYO9Hkx/DuU8DCLY/N6yCtch+eKGM+xEMLdnwH3KAnXudy8kW6Mu\nXqw8sHr3kOX2kUgwCvFfYeOpdXoXSceh09i3I8ELU/31mqe+HaO3rNRaDJJX6SfR\n999zGY7NWl6jRh+3gXQqmJeggfZXK7ApgnAFiQBWLotdDV2UXlABZJzlImMPcxsk\n4zHo0I8KBkT7UXbvgkig0QBVZoFNR+8jQpzfoV5MzQKBgQDmGvr/j4J+rKiJhSpv\n25bXl7Wa36AjkXWgUVMrigNfJtSp5lr288W7gIqi1b1S8WiI8ZxlQNSyYZ+3HJUG\n7zPpBHPgSJVOu9xGjygBkPpGzADVwRSpWsFMFIdVbqHM7DrObHPB54RUE1dxmm+M\nHogDNj+RuywkF8eoJf64SnDdMwKBgQC+1U/xbPlAILm3WGX/T2ZXajl3Ka+OmV2J\ndav86CbcRnEYETD0LN90Tw/l/g9nYme7+tHUDQliCIcAlM1Xglalx6Ssnm16MdCF\nEHtXEcHCcJQq3GcmQokPdR/h7tgb8YznxiDYpbjs1nkrNo4K3R/rCJmnIuZBPrSW\nW29/gDvpFQKBgF8H4YVOBXy/XdN9tasAq2ladFwD4yUNW+Db9VdT5lSTutx4EDVR\nM+ZeDeN2Fnx8yslTz11Zyv3op4d+PGXiwDOJ7TlBgLhFiZFyaflLoLFAa0/cL+ZJ\nXu9GwyWbTSNOpHLAA4afUN1QJ5r5Rvw9V7rL2rEa9f3p/EELgAkoZThVAoGAHSXD\nsiJs56iX9TMhUR+1iACHinXphKRULxy0CksDNH3l5EEr8v+vmbpBuWVWwPm80m97\nASKEnl6jECmqO4WC6otV0a/ZFOLq8IgV7rSdna9IUkubzbI38Q54si+i/pGkbfpL\nJgwZ9MLFex44D9y6dVG49lhURv7m4lhQ7W6OuAkCgYAp7/I4OOUhjyHaUDyEUskX\nraMIYsqYrPTTXP1O3jQi+WGh9r3wqhdPiyUrVKGpxG3/kExO0S+KdPF/IHgwBHCl\nnmYXtPQdTdKAVGeTB3ikPzSTZMAxtQifMmHmZa8t59TkqTnYf7x//8bq0G8toaUl\nxb4rja394DE5QSVK6dU/ug==\n-----END PRIVATE KEY-----\n",
+  "client_email": "neet-exam-portal-57ad1@appspot.gserviceaccount.com",
+  "client_id": "116643297485130115066",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/neet-exam-portal-57ad1%40appspot.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
