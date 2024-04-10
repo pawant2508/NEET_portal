@@ -1,32 +1,22 @@
 import streamlit as st
-import firebase_admin
-from firebase_admin import credentials, firestore
-from firebase_admin import auth
+import pyodbc
 import re
 import random
 import string
 from datetime import datetime, timedelta
 
-# Path to the service account key JSON file
-service_account_key_path = "neet-exam-portal-57ad1-4f5e95416ce8.json"
+# Database connection configuration
+server = 'DESKTOP-3CL2OGS\SQLEXPRESS'  # Assuming SQL Server is running locally
+database = 'NeetRegistrationDB'
 
-
+# Connect to SQL Server
 try:
-    # Initialize Firebase app with the service account key
-    cred = credentials.Certificate(service_account_key_path)
-    firebase_admin.initialize_app(cred)
-    db = firestore.client()
-except ValueError as e:
-    st.error(f"Failed to initialize Firebase: {e}")
+    conn = pyodbc.connect(f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database}')
+    cursor = conn.cursor()
+except pyodbc.Error as e:
+    st.error(f"Failed to connect to SQL Server: {e}")
     st.stop()
 
-# Function to check if the user is an authorized admin
-def is_authorized_admin(user_email):
-    # Implement your logic to check if the user is an admin
-    # For example, you can maintain a list of authorized admin emails
-    # and check if the user's email is in that list
-    authorized_admin_emails = ["admin1@example.com", "admin2@example.com"]
-    return user_email in authorized_admin_emails
 
 # Admin panel functionality
 def admin_panel():
@@ -37,55 +27,15 @@ def admin_panel():
     st.subheader("Manage Users")
     st.write("Here you can manage user accounts.")
 
-    # Example of displaying Firestore data
-    users_ref = db.collection("users")
-    users = users_ref.get()
+    # Example of displaying user data from the database
+    cursor.execute("SELECT * FROM Users")
+    users = cursor.fetchall()
     if users:
         st.write("User List:")
         for user in users:
-            user_data = user.to_dict()
-            st.write(f"- {user.id}: {user_data}")
+            st.write(user)
 
     # Add more admin functionalities as needed
-    st.subheader("Manage Content")
-    st.write("Here you can manage content.")
-
-    # Example of a form to add new content
-    st.subheader("Add New Content")
-    content_title = st.text_input("Title")
-    content_description = st.text_area("Description")
-    if st.button("Add Content"):
-        # Add logic to save content to Firestore
-        st.success(f"Content '{content_title}' added successfully!")
-
-    # Add more components and functionalities here
-
-    # Add your admin panel functionality here
-
-# Admin login function
-def admin_login():
-    st.title("Admin Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    
-    if st.button("Login"):
-        try:
-            # Authenticate the admin user
-            user = auth.get_user_by_email(username)
-            if user.email_verified and user.email == username:
-                # Check if the user is an authorized admin
-                if is_authorized_admin(username):
-                    st.success("Login successful!")
-                    admin_panel()  # Show admin panel
-                else:
-                    st.error("Unauthorized access. You are not an admin.")
-            else:
-                st.error("Invalid username or password.")
-        except auth.UserNotFoundError:
-            st.error("User not found.")
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
-
 
 # Email validation function
 def is_valid_email(email):
@@ -118,14 +68,10 @@ def is_valid_mobile(mobile):
     return re.match(r'^\d{10}$', mobile) is not None
 
 # Signup with email, password, username, category, mobile number, and date of birth
-def sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, category, return_secure_token=True):
+def sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, category):
     try:
         if password != confirm_password:
             st.warning("Passwords do not match!")
-            return
-
-        if mobile and not is_valid_mobile(mobile):
-            st.warning("Invalid mobile number. Please enter a 10-digit number.")
             return
 
         # Check if age is at least 15 years
@@ -134,16 +80,10 @@ def sign_up_with_email_and_password(name, email, mobile, unique_id, password, co
             st.warning("You must be at least 15 years old to register.")
             return
 
-        # Save user data to Firestore
-        user_data = {
-            "name": name,
-            "Email": email,
-            "Phone_Number": mobile,
-            "Unique_ID": unique_id,
-            "DoB": dob.strftime('%Y-%m-%d'),
-            "Category": category
-        }
-        db.collection('users').document(email).set(user_data)
+        # Save user data to the database
+        cursor.execute("INSERT INTO Users (FullName, Email, MobileNo, UniqueID, Passwords, DoB, Category) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                       (name, email, mobile, unique_id, password, dob.strftime('%Y-%m-%d'), category))
+        conn.commit()
 
         # Return success message
         st.success("Registration successful!")
@@ -174,13 +114,52 @@ def registration():
     if st.button('Register'):
         sign_up_with_email_and_password(name, email, mobile, unique_id, password, confirm_password, dob, category)
 
-# User login function (not included for brevity)
-def user_login():
-    pass
+# User login function
+def login_page(email, uniqueID, password):
+    st.title("User Login")
+    
+    email_UniqueID = st.text_input('Email/Unique ID')
+    password = st.text_input('Password', type='password')
+    try:
+        # Query the Users table to check if the provided email/uniqueID and password are valid
+        cursor.execute("SELECT * FROM Users WHERE (Email = ? OR UniqueID = ?) AND Passwords = ?", (email, uniqueID, password))
+        user = cursor.fetchone()
+        
+        if user:
+            # Successfully logged in
+            st.write("Login successful!")
+            # You can also return user information or perform additional actions here
+            return True
+        else:
+            # Invalid credentials
+            st.write("Invalid email/uniqueID or password.")
+            return False
+            
+    except pyodbc.Error as e:
+        # Error occurred during SQL query execution
+        st.error(f"An error occurred while executing the SQL query: {e}")
+        return False
 
 # Admin login function (not included for brevity)
-def admin_panel():
-    pass
+def admin_login(username, password):
+    try:
+        # Query the admin table to check if the provided credentials are valid
+        cursor.execute("SELECT * FROM Admins WHERE Username = ? AND Password = ?", (username, password))
+        admin = cursor.fetchone()
+        if admin:
+            st.success('Login successful!')
+            return True
+        else:
+            st.error('Invalid email, username, or password')
+            return False
+    except pyodbc.Error as e:
+        st.error(f"An error occurred while executing the SQL query: {e}")
+        return False
+    
+# Admin dashboard function
+def admin_dashboard():
+    st.title('Admin Dashboard')
+    # Add administrative functionalities here
 
 # Main app function
 def app():
@@ -199,10 +178,19 @@ def app():
             registration()  # Call the registration function
             
         elif choice == 'Admin Login':
-            admin_login()  # Call the admin login function
-            
+                st.title('Admin Panel')
+                if not st.session_state.get('logged_in'):
+                    username = st.text_input('Username')
+                    password = st.text_input('Password', type='password')
+                    if st.button('Login'):
+                        if admin_login(username, password):
+                            st.session_state.logged_in = True
+                            admin_dashboard()
+                        else:
+                            admin_dashboard()
+                            
         elif choice == 'Login':
-            user_login()  # Call the user login function
+            login_page()  # Call the user login function
 
     if st.session_state.signout:
         st.markdown('*Name* : ' + st.session_state.username)
