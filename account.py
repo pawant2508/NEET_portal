@@ -6,7 +6,7 @@ import string
 from datetime import datetime, timedelta
 
 # Database connection configuration
-server = 'DESKTOP-3CL2OGS\SQLEXPRESS'  # Assuming SQL Server is running locally
+server = '192.168.33.21'  # Assuming SQL Server is running locally
 database = 'NeetRegistrationDB'
 
 # Connect to SQL Server
